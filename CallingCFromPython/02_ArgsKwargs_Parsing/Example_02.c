@@ -28,10 +28,51 @@ example_02__PositionalArgs(PyObject *self, PyObject *args)
     return format_result;
 }
 
+/*
+Function that accept a fixed and varitional positional arguments. No **kwargs 
+
+@note Py_ParseTuple is not required because accessing arguments by their indexes
+*/
+static PyObject*
+example_02__VaritonalArgs(PyObject *self, PyObject *args)
+{
+    int sum = 0;
+
+    /* 
+    args is a sequence of values itself that is indexable
+    So it is like a Python tuple 
+    */
+    Py_ssize_t size_varitional_args = PyTuple_Size(args);
+    for (Py_ssize_t index = 0; index < size_varitional_args; index++)
+    {
+        /* Accessing arguments by index return a item */
+        PyObject* item =  PyTuple_GetItem(args, index);
+        if (index == 0)
+        {
+            /* The item is recast into a C type */
+            sum = PyLong_AsInt(item); /* Converts a Python int into a C int */
+        }
+        else
+        {
+            sum += PyLong_AsInt(item);
+        }
+        
+    }
+
+    /* 
+    Py_BuildValue could be used instead of use PyLong_FromLong
+        return Py_BuildValue("i",sum);
+    
+    Return a Python int object 
+    */
+    return PyLong_FromLong(sum);
+}
+
 static PyMethodDef
 example_02__methods[] = 
 {
     {"PositionalArgs", example_02__PositionalArgs, METH_VARARGS, "Function that only accepted positional arguments. No *args neither **kwargs"},
+    {"VaritonalArgs", example_02__VaritonalArgs, METH_VARARGS, "Function that accepted fixed and varitional positional arguments. No **kwargs"},
     {NULL, NULL, 0, NULL}
 };
 
