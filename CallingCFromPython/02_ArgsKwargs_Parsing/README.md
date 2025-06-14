@@ -1,0 +1,2 @@
+## Brief
+For this experiment is intended to reimplement the functions of [FunctionsToRewrite.py](./FunctionsToRewrite.py) in C, this with the aim of learning how to use the parsers of positional, variable number of and keywords arguments. In addition to also learn how to implement an iterable (a function that makes use of ``yield``).
