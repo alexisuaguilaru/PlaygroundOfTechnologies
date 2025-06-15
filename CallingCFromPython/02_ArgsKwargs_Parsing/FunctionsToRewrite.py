@@ -66,9 +66,9 @@ if __name__ == '__main__':
     PositionalKeywordsArgs(0,1,a=1,b=0.6,c=0.1)
     PositionalKeywordsArgs(-1,2,a=1,b=0.6)
 
-    end = time()
-
     ans = KeywordsArgs(a=123,b='cc',c=0.5)
     print(ans)
+
+    end = time()
 
     print(end-start)

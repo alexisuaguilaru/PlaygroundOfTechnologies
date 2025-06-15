@@ -80,6 +80,7 @@ example_02__PositionalKeywordsArgs(PyObject *self, PyObject *args, PyObject *kwa
     if (!PyArg_ParseTuple(args, "fi", &base, &augm))
         return NULL;
 
+    /* The items in kwargs are iterated for accessing them */
     if (kwargs)
     {
         PyObject *key , *value;
@@ -87,10 +88,36 @@ example_02__PositionalKeywordsArgs(PyObject *self, PyObject *args, PyObject *kwa
 
         while (PyDict_Next(kwargs, &index_item, &key, &value))
         {
-            PyObject* numeric_value = PyNumber_Float(value);
-            float _value = PyFloat_AsDouble(numeric_value);
+            /* Process for converting a Python object into a C float */
+            float _value = PyFloat_AsDouble(value);
             printf("%s %f\n", PyUnicode_AsUTF8(key), base+augm*_value);
         }
+    }
+
+    Py_RETURN_NONE;
+}
+
+/* Function that only accept keyword arguments. No *args */
+static PyObject*
+example_02__KeywordsArgs(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    if (kwargs)
+    {
+        PyObject *key , *value;
+        Py_ssize_t index_item = 0;
+
+        PyObject* list_strings = PyList_New(index_item);
+
+        while (PyDict_Next(kwargs, &index_item, &key, &value))
+        {
+            /* Add formated string into a Python list */
+            PyObject* item_string = PyUnicode_FromFormat("%S :: %S", key, value);
+            PyList_Append(list_strings, item_string);
+        }
+
+        /* This is equivalente to use Python str.join */
+        PyObject* separator = PyUnicode_FromString("\t\t");
+        return PyUnicode_Join(separator,list_strings);
     }
 
     Py_RETURN_NONE;
@@ -101,7 +128,9 @@ example_02__methods[] =
 {
     {"PositionalArgs", example_02__PositionalArgs, METH_VARARGS, "Function that only accepted positional arguments. No *args neither **kwargs"},
     {"VaritonalArgs", example_02__VaritonalArgs, METH_VARARGS, "Function that accepted fixed and varitional positional arguments. No **kwargs"},
+    /* (PyCFunction) is used for pass kwargs to a function */
     {"PositionalKeywordsArgs", (PyCFunction)example_02__PositionalKeywordsArgs, METH_VARARGS | METH_KEYWORDS, "Function that accept positional and keywords arguments. No *args"},
+    {"KeywordsArgs", (PyCFunction)example_02__KeywordsArgs, METH_VARARGS | METH_KEYWORDS, "Function that accept positional and keywords arguments. No *args"},
     {NULL, NULL, 0, NULL}
 };
 

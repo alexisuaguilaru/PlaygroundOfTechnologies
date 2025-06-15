@@ -14,6 +14,9 @@ if __name__ == '__main__':
     example_02__module.PositionalKeywordsArgs(0,1,a=1,b=0.6,c=0.1)
     example_02__module.PositionalKeywordsArgs(-1,2,a=1,b=0.6)
 
+    ans = example_02__module.KeywordsArgs(a=123,b='cc',c=0.5)
+    print(ans)
+
     end = time()
     
     print(end-start)
