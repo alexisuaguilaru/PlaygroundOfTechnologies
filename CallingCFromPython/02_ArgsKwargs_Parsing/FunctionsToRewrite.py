@@ -33,12 +33,12 @@ def VaritonalArgs(
     return sum
 
 def PositionalKeywordsArgs(
-        base:float=0.5,
-        augm:int=1,
+        base:float,
+        augm:int,
         **kwargs:dict[str,Number],
     ) -> None:
     """
-    Function that accept positional/default 
+    Function that accept positional 
     and keywords arguments. No *args
     """
     for _key , _value in kwargs.items():
@@ -54,19 +54,6 @@ def KeywordsArgs(
     string_result = lambda _key , _value : f'{_key} :: {_value}'
     return '\t\t'.join(starmap(string_result,kwargs.items()))
 
-def AllTypeArgs(
-        positional:float,
-        *args:list[int],
-        default:str='world',
-        **kwargs,
-    ) -> Iterator:
-    """
-    Function that accept every type of 
-    argument and yield values
-    """
-    yield positional*sum(args,start=1)
-    yield KeywordsArgs(**{'default':default,**kwargs})
-
 if __name__ == '__main__':
     start = time()
 
@@ -76,15 +63,12 @@ if __name__ == '__main__':
     ans = VaritonalArgs(-1,1,1,2,3,4,5,6)
     print(ans)
 
-    end = time()
+    PositionalKeywordsArgs(0,1,a=1,b=0.6,c=0.1)
+    PositionalKeywordsArgs(-1,2,a=1,b=0.6)
 
-    PositionalKeywordsArgs(a=1,b=0.6,c=0.1)
-    PositionalKeywordsArgs(base=-1,augm=2,a=1,b=0.6)
+    end = time()
 
     ans = KeywordsArgs(a=123,b='cc',c=0.5)
     print(ans)
-
-    for ans in AllTypeArgs(0.5,1,1,12,3,54,a='0',b='1',c='2'):
-        print(ans)
 
     print(end-start)

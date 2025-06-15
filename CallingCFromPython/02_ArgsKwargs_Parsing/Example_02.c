@@ -68,11 +68,40 @@ example_02__VaritonalArgs(PyObject *self, PyObject *args)
     return PyLong_FromLong(sum);
 }
 
+/*
+Function that accept positional and keywords arguments. No *args
+*/
+static PyObject*
+example_02__PositionalKeywordsArgs(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    float base = 0;
+    int augm = 0;
+    
+    if (!PyArg_ParseTuple(args, "fi", &base, &augm))
+        return NULL;
+
+    if (kwargs)
+    {
+        PyObject *key , *value;
+        Py_ssize_t index_item = 0;
+
+        while (PyDict_Next(kwargs, &index_item, &key, &value))
+        {
+            PyObject* numeric_value = PyNumber_Float(value);
+            float _value = PyFloat_AsDouble(numeric_value);
+            printf("%s %f\n", PyUnicode_AsUTF8(key), base+augm*_value);
+        }
+    }
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef
 example_02__methods[] = 
 {
     {"PositionalArgs", example_02__PositionalArgs, METH_VARARGS, "Function that only accepted positional arguments. No *args neither **kwargs"},
     {"VaritonalArgs", example_02__VaritonalArgs, METH_VARARGS, "Function that accepted fixed and varitional positional arguments. No **kwargs"},
+    {"PositionalKeywordsArgs", (PyCFunction)example_02__PositionalKeywordsArgs, METH_VARARGS | METH_KEYWORDS, "Function that accept positional and keywords arguments. No *args"},
     {NULL, NULL, 0, NULL}
 };
 

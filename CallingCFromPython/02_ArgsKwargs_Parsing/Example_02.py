@@ -11,6 +11,9 @@ if __name__ == '__main__':
     ans = example_02__module.VaritonalArgs(-1,1,1,2,3,4,5,6)
     print(ans)
 
+    example_02__module.PositionalKeywordsArgs(0,1,a=1,b=0.6,c=0.1)
+    example_02__module.PositionalKeywordsArgs(-1,2,a=1,b=0.6)
+
     end = time()
     
     print(end-start)
