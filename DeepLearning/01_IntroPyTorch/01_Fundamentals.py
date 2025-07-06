@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.14.10"
-app = marimo.App()
+app = marimo.App(width="medium")
 
 
 @app.cell
@@ -213,6 +213,46 @@ def _(InitialNeuralNetwork):
 
     model = InitialNeuralNetwork()
     print(model)
+    return (model,)
+
+
+@app.cell
+def _(mo):
+    mo.md(r"# 3. Optmizer and Loss Function")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        After defining/building a model (Neural Network) it is time for training. For this, `Optimizer` and `Loss Function` must be selected to learn the best parameters (weights and biases).
+    
+        `Loss Function` measures the perfomance of neural network predictions against the true values.
+    
+        `Optimizer` allows adjusting parameters in each epoch (train loop).
+        """
+    )
+    return
+
+
+@app.cell
+def _(nn):
+    # Init loss function
+
+    loss_fn = nn.CrossEntropyLoss()
+    return
+
+
+@app.cell
+def _(model, torch):
+    # Init optimizer
+
+    learning_rate = 10e-5 # Hiperparameter for training
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=learning_rate,
+    )
     return
 
 
