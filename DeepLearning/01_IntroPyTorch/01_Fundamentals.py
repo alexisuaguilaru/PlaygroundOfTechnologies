@@ -91,7 +91,7 @@ def _(Any, Dataset, Tensor, pd):
             instance = self.pd_dataset.iloc[idx]
             instance_x = instance[self.feature_columns]
             label = instance[self.target_column]
-        
+
             if self.transform: instance_x = self.transform(instance_x)
             if self.target_transform: label = self.target_transform(label)
             return instance_x , label
@@ -104,7 +104,7 @@ def _(Tensor, pd):
 
     def TransformationFeature(instance: pd.Series) -> Tensor:
         for categorical_feature in ['Stage_fear','Drained_after_socializing']:
-            instance[categorical_feature] = int(instance[categorical_feature][0] == 'Y')
+            instance[categorical_feature] = int(instance.loc[categorical_feature][0] == 'Y')
         return Tensor(instance) # Must return a Tensor type
 
     def TransformationLabel(label: str) -> int:
@@ -181,6 +181,18 @@ def _(Tensor, nn):
             """
             super().__init__()
 
+            # Architecture/Topology
+            ## torch.nn.Sequential chains a sequence of layers in one interface
+            self.NN = nn.Sequential( 
+                nn.Linear(in_features=7,out_features=4),
+                nn.Dropout(p=0.3), # Deactivate some neurons with probability p
+                nn.ReLU(), 
+                nn.Linear(in_features=4,out_features=3),
+                nn.Dropout(p=0.7),
+                nn.ReLU(),
+                nn.Linear(in_features=3,out_features=2), # Output layer
+            )
+
         def forward(
                 self,
                 x: Tensor
@@ -190,7 +202,17 @@ def _(Tensor, nn):
             and its flow throught the 
             newtwork is defined here
             """
-            return x
+            logits = self.NN(x) # Compute final outputs (logits for clasification problems)
+            return logits
+    return (InitialNeuralNetwork,)
+
+
+@app.cell
+def _(InitialNeuralNetwork):
+    # Instance of NN
+
+    model = InitialNeuralNetwork()
+    print(model)
     return
 
 
