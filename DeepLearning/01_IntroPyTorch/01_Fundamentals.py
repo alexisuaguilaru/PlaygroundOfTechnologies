@@ -148,10 +148,10 @@ def _(DataLoader, dataset, random_split, torch):
 
     # Definition and init of dataloaders
 
-    BATCH_SIZE = 32
-    dataloader_train = DataLoader(dataset_train,batch_size=BATCH_SIZE,shuffle=True)
-    dataloader_test = DataLoader(dataset_test,batch_size=BATCH_SIZE,shuffle=True)
-    return
+    batch_size = 32
+    dataloader_train = DataLoader(dataset_train,batch_size=batch_size,shuffle=True)
+    dataloader_test = DataLoader(dataset_test,batch_size=batch_size,shuffle=True)
+    return batch_size, dataloader_test, dataloader_train
 
 
 @app.cell
@@ -226,11 +226,11 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        After defining/building a model (Neural Network) it is time for training. For this, `Optimizer` and `Loss Function` must be selected to learn the best parameters (weights and biases).
+        After defining/building a model (Neural Network) it is time for training and fitting. For this, `Optimizer` and `Loss Function` must be selected to learn the best parameters (weights and biases).
     
-        `Loss Function` measures the perfomance of neural network predictions against the true values.
+        `Loss Function` or `loss_fn` (subclass of `torch.NN.Module`) measures the perfomance of neural network predictions against the true values. `loss_fn.backward()` method computes the gradients based on loss value and is called after `torch.NN.Module.__call__` with a train instance.
     
-        `Optimizer` allows adjusting parameters in each epoch (train loop).
+        `Optimizer` (subclass of `torch.optim.Optimizer`) allows adjusting parameters after each epoch (train loop). `Optimizer.step()` method updates model parameters using the computed gradients with `loss_fn.backward()`
         """
     )
     return
@@ -241,7 +241,7 @@ def _(nn):
     # Init loss function
 
     loss_fn = nn.CrossEntropyLoss()
-    return
+    return (loss_fn,)
 
 
 @app.cell
@@ -250,9 +250,77 @@ def _(model, torch):
 
     learning_rate = 10e-5 # Hiperparameter for training
     optimizer = torch.optim.Adam(
-        model.parameters(),
+        model.parameters(), # Model parameters to fit/adjust/optimize
+        # Other Optimizer parameterss like learning rate, weight decay
         lr=learning_rate,
     )
+    return (optimizer,)
+
+
+@app.cell
+def _(batch_size, torch):
+    # Source code :: https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html#optimization-loop
+
+    def train_loop(dataloader, model, loss_fn, optimizer):
+        size = len(dataloader.dataset)
+        # Set the model to training mode - important for batch normalization and dropout layers
+        # Unnecessary in this situation but added for best practices
+        model.train()
+        for batch, (X, y) in enumerate(dataloader):
+            # Compute prediction and loss
+            pred = model(X)
+            loss = loss_fn(pred, y)
+
+            # Backpropagation
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad() # Reset computed gradients
+
+            if batch % 100 == 0:
+                loss, current = loss.item(), batch * batch_size + len(X)
+                print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+
+
+    def test_loop(dataloader, model, loss_fn):
+        # Set the model to evaluation mode - important for batch normalization and dropout layers
+        # Unnecessary in this situation but added for best practices
+        model.eval()
+        size = len(dataloader.dataset)
+        num_batches = len(dataloader)
+        test_loss, correct = 0, 0
+
+        # Evaluating the model with torch.no_grad() ensures that no gradients are computed during test mode
+        # also serves to reduce unnecessary gradient computations and memory usage for tensors with requires_grad=True
+        with torch.no_grad():
+            for X, y in dataloader:
+                pred = model(X)
+                test_loss += loss_fn(pred, y).item()
+                correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+
+        test_loss /= num_batches
+        correct /= size
+        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+    return test_loop, train_loop
+
+
+@app.cell
+def _(
+    dataloader_test,
+    dataloader_train,
+    loss_fn,
+    model,
+    optimizer,
+    test_loop,
+    train_loop,
+):
+    # Source code :: https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html#optimization-loop
+
+    epochs = 5
+    for t in range(epochs):
+        print(f"Epoch {t+1}\n-------------------------------")
+        train_loop(dataloader_train, model, loss_fn, optimizer)
+        test_loop(dataloader_test, model, loss_fn)
+    print("Done!")
     return
 
 
