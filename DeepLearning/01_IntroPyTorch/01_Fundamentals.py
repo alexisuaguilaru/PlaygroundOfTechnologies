@@ -231,6 +231,8 @@ def _(mo):
         `Loss Function` or `loss_fn` (subclass of `torch.NN.Module`) measures the perfomance of neural network predictions against the true values. `loss_fn.backward()` method computes the gradients based on loss value and is called after `torch.NN.Module.__call__` with a train instance.
     
         `Optimizer` (subclass of `torch.optim.Optimizer`) allows adjusting parameters after each epoch (train loop). `Optimizer.step()` method updates model parameters using the computed gradients with `loss_fn.backward()`
+    
+        `torcheval.metrics` offers other evaluation metrics build on PyTorch
         """
     )
     return
@@ -254,7 +256,7 @@ def _(model, torch):
         # Other Optimizer parameterss like learning rate, weight decay
         lr=learning_rate,
     )
-    return (optimizer,)
+    return learning_rate, optimizer
 
 
 @app.cell
@@ -315,12 +317,82 @@ def _(
 ):
     # Source code :: https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html#optimization-loop
 
-    epochs = 5
+    epochs = 10
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train_loop(dataloader_train, model, loss_fn, optimizer)
         test_loop(dataloader_test, model, loss_fn)
     print("Done!")
+    return
+
+
+@app.cell
+def _(batch_size, torch):
+    def train_loop_custom(dataloader, model, loss_fn, optimizer):
+        size = len(dataloader.dataset)
+
+        model.train()
+        for batch, (X, y) in enumerate(dataloader):
+            pred = model(X)
+            loss = loss_fn(pred, y)
+
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+
+            if batch % 10 == 0:
+                loss, current = loss.item(), batch * batch_size + len(X)
+                print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+
+    def test_loop_custom(dataloader, model, loss_fn, metric):
+        model.eval()
+        num_batches = len(dataloader)
+        test_loss = 0
+
+        with torch.no_grad():
+            for X, y in dataloader:
+                pred = model(X)
+                test_loss += loss_fn(pred, y).item()
+
+                metric.update(pred.argmax(1), y) # Method for loading/saving predictions-target pairs
+
+        test_loss /= num_batches
+        print(f"Test Error: \nF1: {(metric.compute()*100):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+        metric.reset() # Method for reseting/deleting pred-target pairs 
+    return test_loop_custom, train_loop_custom
+
+
+@app.cell
+def _(
+    InitialNeuralNetwork,
+    dataloader_test,
+    dataloader_train,
+    learning_rate,
+    loss_fn,
+    test_loop_custom,
+    torch,
+    train_loop_custom,
+):
+    from torcheval.metrics import MulticlassF1Score
+
+    _model = InitialNeuralNetwork()
+    _optimizer = torch.optim.Adam(
+        _model.parameters(),
+        lr=learning_rate,
+    )
+
+    # Init metric for model evaluation
+    _metric = MulticlassF1Score(
+        num_classes=2,
+        average='weighted',
+    )
+
+    # Using custom train and test loops
+    _epochs = 5
+    for _t in range(_epochs):
+        print(f"Epoch {_t+1}\n-------------------------------")
+        train_loop_custom(dataloader_train, _model, loss_fn, _optimizer)
+        test_loop_custom(dataloader_test, _model, loss_fn, _metric)
     return
 
 
