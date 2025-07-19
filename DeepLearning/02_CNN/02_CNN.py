@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.14.10"
+__generated_with = "0.14.12"
 app = marimo.App()
 
 
@@ -17,7 +17,16 @@ def _():
 
     # Auxiliar modules
     import matplotlib.pyplot as plt
-    return DataLoader, Tensor, datasets, mo, nn, transforms
+    return DataLoader, Tensor, datasets, mo, nn, torch, transforms
+
+
+@app.cell
+def _(torch):
+    # Useful variables
+
+    TORCH_DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    TORCH_DEVICE
+    return
 
 
 @app.cell
@@ -77,6 +86,12 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    mo.md(r"The basic construction blocks for a CNN are convolutional layers, that consists of a convolutional operation, activation function and pooling operation. A CNN is built by stacking several convolutional layers and a dense network.")
+    return
+
+
+@app.cell
 def _(Tensor, nn):
     class CNN(nn.Module):
         def __init__(
@@ -84,11 +99,47 @@ def _(Tensor, nn):
             ):
             super().__init__()
 
+            # Defining Convolutional Network
+            ConvLayer1 = nn.Sequential(
+                nn.Conv2d(3,5,kernel_size=3),
+                nn.ReLU(),
+                nn.MaxPool2d(2,2),
+            )
+            ConvLayer2 = nn.Sequential(
+                nn.Conv2d(5,4,kernel_size=2,stride=2),
+                nn.ReLU(),
+                nn.AvgPool2d(2,2),
+            )
+            self.ConvNet = nn.Sequential(
+                ConvLayer1,
+                ConvLayer2,
+                nn.Flatten(1),
+            )
+
+            # Defining Dense Network
+            self.DenseNet = nn.Sequential(
+                nn.Linear(36,12),
+                nn.Tanh(),
+                nn.Linear(12,10),
+            )
+
         def forward(
                 self,
                 x: Tensor
             ) -> Tensor:
-            pass
+            x = self.ConvNet(x)
+            logits = self.DenseNet(x)
+            return logits
+    return (CNN,)
+
+
+@app.cell
+def _(CNN):
+    # Init of model
+
+    ModelCNN = CNN()
+
+    ModelCNN
     return
 
 
