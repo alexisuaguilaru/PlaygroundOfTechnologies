@@ -1,0 +1,2 @@
+## Brief
+For this experiment is intended to implement the simple class in [ClassToImplement.py](./ClassToImplement.py) in C/C++ using the Python/C API, this with the aim of learn how to call and use a class written in C/C++ from Python.
