@@ -1,4 +1,5 @@
 #include <iostream>
+#include <Python.h>
 
 /*
 @brief Class being implemented in with Python/C API
