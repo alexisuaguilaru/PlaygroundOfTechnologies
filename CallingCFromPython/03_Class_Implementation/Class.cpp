@@ -1,46 +1,15 @@
 #include <Python.h>
 #include <iostream>
 
-/*
-@brief Class being implemented in with Python/C API
+#include "Class.hpp"
 
-* Python definition in ClassToImplement.py
+/* 
+This preprocessor directive disactivate name mangling of C++, 
+this causes that the functions do not work correctly
 */
-class Rectangle
-{
-    private:
-        std::string Name;
-        double Base , Height;
-
-    public:
-        /*__init__ class method*/
-        Rectangle(
-            const std::string& name,
-            double base,
-            double height
-        );
-
-        /* __del__ class method*/        
-        ~Rectangle();
-
-        /* magical class methods */
-        std::string Rectangle_str() const;
-        bool Rectangle_lt(const Rectangle& other) const;
-        bool Rectangle_eq(const Rectangle& other) const;
-
-        /* other class methods */
-        double Rectangle_Area() const;
-};
-
-/*
-Basic struct used like an interface between 
-Python and C/C++ objects
-*/
-typedef struct 
-{
-    PyObject_HEAD
-    Rectangle* CppObject;
-} RectanglePyObject;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 // Methods in a Python class //
@@ -179,3 +148,7 @@ PyInit_RectangleModule(void)
     
     return Module; 
 };
+
+#ifdef __cplusplus
+}
+#endif

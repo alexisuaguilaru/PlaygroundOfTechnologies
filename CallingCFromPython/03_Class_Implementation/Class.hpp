@@ -1,5 +1,5 @@
-#include <iostream>
 #include <Python.h>
+#include <iostream>
 
 /*
 @brief Class being implemented in with Python/C API
@@ -14,20 +14,15 @@ class Rectangle
 
     public:
         /*__init__ class method*/
-        Rectangle(
-            const std::string& name,
-            double base,
-            double height
-        );
-
-        /* __del__ class method*/        
-        ~Rectangle();
-
-        /* magical class methods */
-        std::string Rectangle_str() const;
-        bool Rectangle_lt(const Rectangle& other) const;
-        bool Rectangle_eq(const Rectangle& other) const;
-
-        /* other class methods */
-        double Rectangle_Area() const;
+        Rectangle(std::string name,double base,double height) : Name(name), Base(base), Height(height) {}
 };
+
+/*
+Basic struct used like an interface between 
+Python and C/C++ objects
+*/
+typedef struct 
+{
+    PyObject_HEAD
+    Rectangle* CppObject;
+} RectanglePyObject;

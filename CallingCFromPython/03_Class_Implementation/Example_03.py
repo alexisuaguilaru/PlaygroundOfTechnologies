@@ -2,7 +2,8 @@ from ClassToImplement import Rectangle
 import RectangleModule
 
 if __name__ == '__main__':
-    RectangleModule.Rectangle
+    RectangleModule.Rectangle('A',2,2)
+    RectangleModule.Rectangle('B',3.0,4.0)
 
     rect_A = Rectangle('A',2,2)
     rect_B = Rectangle('B',3.0,4.0)
