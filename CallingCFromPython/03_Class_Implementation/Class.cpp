@@ -50,7 +50,7 @@ static int
 Rectangle_init(RectanglePyObject* self,PyObject* args,PyObject* kwargs)
 {
     double Base = 0, Height = 0;
-    const char* Name = "";
+    const char*  Name = "";
     static char* kwlist[] = {"Name", "Base", "Height", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args,kwargs,"sdd", kwlist, &Name, &Base, &Height)) {
@@ -61,8 +61,66 @@ Rectangle_init(RectanglePyObject* self,PyObject* args,PyObject* kwargs)
     return 0;
 }
 
+static PyObject* 
+Rectangle_str(RectanglePyObject* self)
+{   
+    std::string name = self->CppObject->Name;
+    const char* name_char = name.c_str();
+    double base = self->CppObject->Base, height = self->CppObject->Height;
+
+    int size_buffer = snprintf(NULL,0,"Rectangle %s :: %.2f x %.2f",name_char,base,height) + 1;
+    char* buffer = (char*)malloc(size_buffer);
+
+    snprintf(buffer,size_buffer,"Rectangle %s :: %.2f x %.2f",name_char,base,height);
+    PyObject *format_result = PyUnicode_FromString(buffer);
+
+    free(buffer);
+
+    return format_result;
+}
+
+static PyObject* 
+Rectangle_richcompare(PyObject* self,PyObject* other,int op)
+{
+    if (Py_TYPE(self) != Py_TYPE(other)) 
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    RectanglePyObject* self_rect = (RectanglePyObject*)self;
+    RectanglePyObject* other_rect = (RectanglePyObject*)other;
+
+    double self_area = self_rect->CppObject->Area();
+    double other_area = other_rect->CppObject->Area();
+
+    switch (op)
+    {
+    case Py_LT: // __lt__ method
+        if (self_area < other_area) Py_RETURN_TRUE;
+        Py_RETURN_FALSE;
+    
+    case Py_EQ: // __eq__ method
+        if (self_area == other_area) Py_RETURN_TRUE;
+        Py_RETURN_FALSE;
+
+    default:
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+}
+
+/*
+C wrapper for Area method of C++ class
+*/
+static PyObject* 
+Rectangle_Area(RectanglePyObject* self)
+{
+    return PyFloat_FromDouble(self->CppObject->Area());
+}
+
 static PyMethodDef 
 Rectangle_Methods[] = {
+    // The function (implementation) must be casted into a PyCFunction
+    {"Area",(PyCFunction)Rectangle_Area,METH_NOARGS,"Area of Rectangle"},
     {NULL}
 };
 
@@ -94,11 +152,13 @@ RectanglePyType = {
    .tp_itemsize = 0,
 
    .tp_dealloc = (destructor)Rectangle_dealloc,
-   
+   .tp_str = (reprfunc)Rectangle_str,
+
    .tp_flags = Py_TPFLAGS_DEFAULT, // Base behavior of a class in Python
    
    .tp_doc = PyDoc_STR("Class for defining a Rectangle"),
 
+    .tp_richcompare = Rectangle_richcompare,
     .tp_methods = Rectangle_Methods,
     .tp_getset = Rectangle_GetSetters,
 

@@ -8,13 +8,16 @@
 */
 class Rectangle
 {
-    private:
+    public:
         std::string Name;
         double Base , Height;
 
-    public:
         /*__init__ class method*/
-        Rectangle(std::string name,double base,double height) : Name(name), Base(base), Height(height) {}
+        Rectangle(const std::string& name,double base,double height) : Name(name), Base(base), Height(height) {}
+        double Area()
+        {
+            return Base*Height;
+        }
 };
 
 /*
