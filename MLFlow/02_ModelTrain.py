@@ -89,7 +89,7 @@ Metrics = {
     'f1': partial(f1_score,average='macro'),
 }
 
-with mlflow.start_run(run_name='train-models',experiment_id=ExperimentID) as MainRun:
+with mlflow.start_run(run_name='train-decision-tree-model',experiment_id=ExperimentID):
     ### Log datasets for this experiment
     mlflow.log_input(
         TrainDataset,
@@ -98,40 +98,46 @@ with mlflow.start_run(run_name='train-models',experiment_id=ExperimentID) as Mai
         TestDataset,
         context = 'testing',tags={'run_artifact_source': RunID_LoadDatasets, 'features_artifact': 'test_X.csv', 'target_artifact': 'test_y.csv'})
 
-    ### Decision Tree
-    with mlflow.start_run(run_name='decision-tree-model',experiment_id=ExperimentID,nested=True):
-        mlflow.log_param('model','Decision Tree')
-        Classifier_Tree.fit(TrainDataset_X,TrainDataset_y)
-        tree_logged_model = mlflow.sklearn.log_model(
-            Classifier_Tree,
-            name = 'iris-classifier-tree',
-            params = ModelParams_Tree
-        ) # Log model as artifact
+    mlflow.log_param('model','Decision Tree')
+    Classifier_Tree.fit(TrainDataset_X,TrainDataset_y)
+    tree_logged_model = mlflow.sklearn.log_model(
+        Classifier_Tree,
+        name = 'iris-classifier-tree',
+        params = ModelParams_Tree
+    ) # Log model as artifact
 
-        tree_predictions_y = Classifier_Tree.predict(TestDataset_X)
-        for metric_name , metric in Metrics.items():
-            score = metric(TestDataset_y,tree_predictions_y)
-            mlflow.log_metric(
-                metric_name,score,
-                model_id = tree_logged_model.model_id,
-                dataset = TestDataset,
-            )
+    tree_predictions_y = Classifier_Tree.predict(TestDataset_X)
+    for metric_name , metric in Metrics.items():
+        score = metric(TestDataset_y,tree_predictions_y)
+        mlflow.log_metric(
+            metric_name,score,
+            model_id = tree_logged_model.model_id,
+            dataset = TestDataset,
+        )
+
+with mlflow.start_run(run_name='train-logistic-model',experiment_id=ExperimentID):
+    ### Log datasets for this experiment
+    mlflow.log_input(
+        TrainDataset,
+        context = 'training',tags={'run_artifact_source': RunID_LoadDatasets, 'features_artifact': 'train_X.csv', 'target_artifact': 'train_y.csv'}) # Log train dataset reference
+    mlflow.log_input(
+        TestDataset,
+        context = 'testing',tags={'run_artifact_source': RunID_LoadDatasets, 'features_artifact': 'test_X.csv', 'target_artifact': 'test_y.csv'})
 
     ### Logistic Regression
-    with mlflow.start_run(run_name='logistic-model',experiment_id=ExperimentID,nested=True):
-        mlflow.log_param('model','Logistic Regression')
-        Classifier_Logistic.fit(TrainDataset_X,TrainDataset_y)
-        logistic_logged_model = mlflow.sklearn.log_model(
-            Classifier_Logistic,
-            name = 'iris-classifier-logistic',
-            params = ModelParams_Logistic,
-        ) # Log model as artifact
+    mlflow.log_param('model','Logistic Regression')
+    Classifier_Logistic.fit(TrainDataset_X,TrainDataset_y)
+    logistic_logged_model = mlflow.sklearn.log_model(
+        Classifier_Logistic,
+        name = 'iris-classifier-logistic',
+        params = ModelParams_Logistic,
+    ) # Log model as artifact
 
-        logistic_predictions_y = Classifier_Logistic.predict(TestDataset_X)
-        for metric_name , metric in Metrics.items():
-            score = metric(TestDataset_y,logistic_predictions_y)
-            mlflow.log_metric(
-                metric_name,score,
-                model_id = logistic_logged_model.model_id,
-                dataset = TestDataset,
-            )
+    logistic_predictions_y = Classifier_Logistic.predict(TestDataset_X)
+    for metric_name , metric in Metrics.items():
+        score = metric(TestDataset_y,logistic_predictions_y)
+        mlflow.log_metric(
+            metric_name,score,
+            model_id = logistic_logged_model.model_id,
+            dataset = TestDataset,
+        )
