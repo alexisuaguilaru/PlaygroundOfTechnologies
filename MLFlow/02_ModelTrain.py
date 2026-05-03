@@ -46,6 +46,7 @@ TestDataset_y = pd.read_csv(Test_y_DatasetPath)
 ## Init MLFlow datasets to log
 TrainDataset = pd.concat([TrainDataset_X,TrainDataset_y],axis=1)
 TestDataset = pd.concat([TestDataset_X,TestDataset_y],axis=1)
+InputExamples = TrainDataset_X.iloc[:10]
 
 TrainDataset = mlflow.data.from_pandas(
     TrainDataset,
@@ -103,7 +104,9 @@ with mlflow.start_run(run_name='train-decision-tree-model',experiment_id=Experim
     tree_logged_model = mlflow.sklearn.log_model(
         Classifier_Tree,
         name = 'iris-classifier-tree',
-        params = ModelParams_Tree
+        params = ModelParams_Tree,
+        registered_model_name = 'IrisClassTree', # Create a register with the model in MLFlow
+        input_example = InputExamples, # Automatize schema generation for endpoint
     ) # Log model as artifact
 
     tree_predictions_y = Classifier_Tree.predict(TestDataset_X)
@@ -131,6 +134,8 @@ with mlflow.start_run(run_name='train-logistic-model',experiment_id=ExperimentID
         Classifier_Logistic,
         name = 'iris-classifier-logistic',
         params = ModelParams_Logistic,
+        registered_model_name = 'IrisClassLogistic', # Create a register with the model in MLFlow
+        input_example = InputExamples, # Automatize schema generation for endpoint
     ) # Log model as artifact
 
     logistic_predictions_y = Classifier_Logistic.predict(TestDataset_X)
