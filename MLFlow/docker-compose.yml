@@ -22,6 +22,7 @@ services:
             retries: 10
 
     storage:
+        # MinIO
         image: rustfs/rustfs:1.0.0-alpha.83
         container_name: mlflow-storage
         environment:
@@ -97,7 +98,6 @@ services:
 
             # Server host/port
             MLFLOW_HOST: ${MLFLOW_HOST}
-            MLFLOW_PORT: ${MLFLOW_PORT}
         command:
             - /bin/bash
             - -c

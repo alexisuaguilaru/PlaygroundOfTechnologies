@@ -73,7 +73,7 @@ ModelParams_Tree = dict(
 )
 Classifier_Tree = DecisionTreeClassifier(**ModelParams_Tree)
 
-### Init ML Model
+### Init Logistic Regression Model
 ModelParams_Logistic = dict(
     penalty = 'elasticnet',
     solver = 'saga',
@@ -94,10 +94,12 @@ with mlflow.start_run(run_name='train-decision-tree-model',experiment_id=Experim
     ### Log datasets for this experiment
     mlflow.log_input(
         TrainDataset,
-        context = 'training',tags={'run_artifact_source': RunID_LoadDatasets, 'features_artifact': 'train_X.csv', 'target_artifact': 'train_y.csv'}) # Log train dataset reference
+        context = 'training',
+        tags = {'run_artifact_source': RunID_LoadDatasets, 'features_artifact': 'train_X.csv', 'target_artifact': 'train_y.csv'}) # Log train dataset reference
     mlflow.log_input(
         TestDataset,
-        context = 'testing',tags={'run_artifact_source': RunID_LoadDatasets, 'features_artifact': 'test_X.csv', 'target_artifact': 'test_y.csv'})
+        context = 'testing',
+        tags = {'run_artifact_source': RunID_LoadDatasets, 'features_artifact': 'test_X.csv', 'target_artifact': 'test_y.csv'})
 
     mlflow.log_param('model','Decision Tree')
     Classifier_Tree.fit(TrainDataset_X,TrainDataset_y)

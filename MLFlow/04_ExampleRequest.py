@@ -18,7 +18,7 @@ DataToPredict = InferenceData.to_dict(orient='split')
 PredictedResponse = requests.post(
     Endpoint,
     headers = Headers,
-    json = {"dataframe_split": DataToPredict},
+    json = {'dataframe_split': DataToPredict},
 )
 
 print(json.loads(PredictedResponse.content))
